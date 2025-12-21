@@ -10,7 +10,8 @@ import {
   Building2,
   Search,
   Newspaper,
-  Star
+  Star,
+  LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,14 +20,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-const cities = [
-  { id: "moscow", name: "Москва" },
-  { id: "spb", name: "Санкт-Петербург" },
-  { id: "kazan", name: "Казань" },
-  { id: "sochi", name: "Сочи" },
-  { id: "ekb", name: "Екатеринбург" },
-];
+import { useCities } from "@/hooks/useCities";
+import { useAuth } from "@/hooks/useAuth";
+import { useFavorites } from "@/hooks/useFavorites";
 
 const navLinks = [
   { href: "/catalog", label: "Каталог ЖК", icon: Building2 },
@@ -36,7 +32,9 @@ const navLinks = [
 ];
 
 export const Header = () => {
-  const [selectedCity, setSelectedCity] = useState(cities[0]);
+  const { cities, selectedCity, setSelectedCity } = useCities();
+  const { user, signOut } = useAuth();
+  const { count: favCount } = useFavorites();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -57,7 +55,7 @@ export const Header = () => {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="gap-1.5 text-sm font-medium">
               <MapPin className="h-4 w-4 text-accent" />
-              <span className="hidden sm:inline">{selectedCity.name}</span>
+              <span className="hidden sm:inline">{selectedCity?.name || "Город"}</span>
               <ChevronDown className="h-4 w-4 text-muted-foreground" />
             </Button>
           </DropdownMenuTrigger>
@@ -66,7 +64,7 @@ export const Header = () => {
               <DropdownMenuItem
                 key={city.id}
                 onClick={() => setSelectedCity(city)}
-                className={selectedCity.id === city.id ? "bg-secondary" : ""}
+                className={selectedCity?.id === city.id ? "bg-secondary" : ""}
               >
                 {city.name}
               </DropdownMenuItem>
@@ -91,15 +89,35 @@ export const Header = () => {
           <Link to="/favorites">
             <Button variant="ghost" size="icon" className="relative">
               <Heart className="h-5 w-5" />
-              <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground">
-                3
-              </span>
+              {favCount > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground">
+                  {favCount}
+                </span>
+              )}
             </Button>
           </Link>
           
-          <Button variant="ghost" size="icon" className="hidden sm:flex">
-            <User className="h-5 w-5" />
-          </Button>
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="hidden sm:flex">
+                  <User className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => signOut()}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Выйти
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Link to="/auth" className="hidden sm:block">
+              <Button variant="ghost" size="icon">
+                <User className="h-5 w-5" />
+              </Button>
+            </Link>
+          )}
 
           <Button 
             variant="ghost" 
