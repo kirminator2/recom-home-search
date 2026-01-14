@@ -8,7 +8,6 @@ import {
   Menu, 
   X,
   Building2,
-  Search,
   Newspaper,
   Star,
   LogOut
@@ -25,8 +24,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
 
 const navLinks = [
-  { href: "/catalog", label: "Каталог ЖК", icon: Building2 },
-  { href: "/map", label: "На карте", icon: Search },
+  { href: "/catalog", label: "Каталог", icon: Building2 },
   { href: "/developers", label: "Застройщики", icon: Star },
   { href: "/news", label: "Новости", icon: Newspaper },
 ];
@@ -38,14 +36,14 @@ export const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-card/80 backdrop-blur-xl">
-      <div className="container flex h-16 items-center justify-between gap-4">
+    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/80">
+      <div className="container flex h-14 items-center justify-between gap-4">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <Building2 className="h-5 w-5 text-primary-foreground" />
+        <Link to="/" className="flex items-center gap-2.5 transition-opacity hover:opacity-80">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+            <Building2 className="h-4 w-4 text-primary-foreground" />
           </div>
-          <span className="hidden text-xl font-bold text-foreground sm:inline-block">
+          <span className="hidden text-lg font-semibold text-foreground sm:inline-block">
             НовоДом
           </span>
         </Link>
@@ -53,18 +51,21 @@ export const Header = () => {
         {/* City Selector */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="gap-1.5 text-sm font-medium">
-              <MapPin className="h-4 w-4 text-accent" />
+            <Button 
+              variant="ghost" 
+              className="h-8 gap-1.5 px-2.5 text-sm font-medium transition-colors hover:bg-secondary/80"
+            >
+              <MapPin className="h-3.5 w-3.5 text-primary" />
               <span className="hidden sm:inline">{selectedCity?.name || "Город"}</span>
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition-transform duration-200" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-48">
+          <DropdownMenuContent align="start" className="w-44 animate-in fade-in-0 zoom-in-95 duration-200">
             {cities.map((city) => (
               <DropdownMenuItem
                 key={city.id}
                 onClick={() => setSelectedCity(city)}
-                className={selectedCity?.id === city.id ? "bg-secondary" : ""}
+                className={`cursor-pointer transition-colors ${selectedCity?.id === city.id ? "bg-secondary font-medium" : ""}`}
               >
                 {city.name}
               </DropdownMenuItem>
@@ -73,11 +74,14 @@ export const Header = () => {
         </DropdownMenu>
 
         {/* Desktop Navigation */}
-        <nav className="hidden flex-1 items-center justify-center gap-1 md:flex">
+        <nav className="hidden flex-1 items-center justify-center gap-0.5 md:flex">
           {navLinks.map((link) => (
             <Link key={link.href} to={link.href}>
-              <Button variant="ghost" size="sm" className="gap-1.5">
-                <link.icon className="h-4 w-4" />
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 gap-1.5 px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-transparent hover:text-foreground"
+              >
                 {link.label}
               </Button>
             </Link>
@@ -85,13 +89,17 @@ export const Header = () => {
         </nav>
 
         {/* Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <Link to="/favorites">
-            <Button variant="ghost" size="icon" className="relative">
-              <Heart className="h-5 w-5" />
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="relative h-8 w-8 transition-colors hover:bg-secondary/80"
+            >
+              <Heart className={`h-4 w-4 transition-all duration-300 ${favCount > 0 ? "fill-primary text-primary" : ""}`} />
               {favCount > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground">
-                  {favCount}
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground animate-in zoom-in-50 duration-200">
+                  {favCount > 99 ? "99+" : favCount}
                 </span>
               )}
             </Button>
@@ -100,21 +108,21 @@ export const Header = () => {
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="hidden sm:flex">
-                  <User className="h-5 w-5" />
+                <Button variant="ghost" size="icon" className="hidden h-8 w-8 sm:flex hover:bg-secondary/80">
+                  <User className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => signOut()}>
-                  <LogOut className="mr-2 h-4 w-4" />
+              <DropdownMenuContent align="end" className="w-40 animate-in fade-in-0 zoom-in-95 duration-200">
+                <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer gap-2 text-destructive focus:text-destructive">
+                  <LogOut className="h-4 w-4" />
                   Выйти
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <Link to="/auth" className="hidden sm:block">
-              <Button variant="ghost" size="icon">
-                <User className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-secondary/80">
+                <User className="h-4 w-4" />
               </Button>
             </Link>
           )}
@@ -122,33 +130,43 @@ export const Header = () => {
           <Button 
             variant="ghost" 
             size="icon" 
-            className="md:hidden"
+            className="h-8 w-8 md:hidden hover:bg-secondary/80"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </Button>
         </div>
       </div>
 
       {/* Mobile Navigation */}
-      {mobileMenuOpen && (
-        <div className="absolute left-0 right-0 top-16 border-b border-border bg-card p-4 md:hidden">
-          <nav className="flex flex-col gap-2">
-            {navLinks.map((link) => (
-              <Link 
-                key={link.href} 
-                to={link.href}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <Button variant="ghost" className="w-full justify-start gap-2">
-                  <link.icon className="h-4 w-4" />
-                  {link.label}
-                </Button>
-              </Link>
-            ))}
-          </nav>
-        </div>
-      )}
+      <div 
+        className={`absolute left-0 right-0 top-14 overflow-hidden border-b border-border/50 bg-background transition-all duration-300 ease-out md:hidden ${
+          mobileMenuOpen ? "max-h-64 opacity-100" : "max-h-0 opacity-0 border-transparent"
+        }`}
+      >
+        <nav className="container flex flex-col gap-1 py-3">
+          {navLinks.map((link) => (
+            <Link 
+              key={link.href} 
+              to={link.href}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Button variant="ghost" className="w-full justify-start gap-2 h-10 text-sm">
+                <link.icon className="h-4 w-4 text-muted-foreground" />
+                {link.label}
+              </Button>
+            </Link>
+          ))}
+          {!user && (
+            <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
+              <Button variant="ghost" className="w-full justify-start gap-2 h-10 text-sm">
+                <User className="h-4 w-4 text-muted-foreground" />
+                Войти
+              </Button>
+            </Link>
+          )}
+        </nav>
+      </div>
     </header>
   );
 };
