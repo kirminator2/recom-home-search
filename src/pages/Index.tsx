@@ -6,6 +6,7 @@ import { FeaturedProperties } from "@/components/home/FeaturedProperties";
 import { DevelopersSection } from "@/components/home/DevelopersSection";
 import { NewsSection } from "@/components/home/NewsSection";
 import { CTASection } from "@/components/home/CTASection";
+import { AISearchButton } from "@/components/ai/AISearchButton";
 
 const Index = () => {
   return (
