@@ -10,7 +10,8 @@ import {
   Building2,
   Newspaper,
   Star,
-  LogOut
+  LogOut,
+  Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +23,7 @@ import {
 import { useCities } from "@/hooks/useCities";
 import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
+import { AISearchDialog } from "@/components/ai/AISearchDialog";
 
 const navLinks = [
   { href: "/catalog", label: "Каталог", icon: Building2 },
@@ -34,6 +36,7 @@ export const Header = () => {
   const { user, signOut } = useAuth();
   const { count: favCount } = useFavorites();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [aiSearchOpen, setAiSearchOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/80">
@@ -89,7 +92,22 @@ export const Header = () => {
         </nav>
 
         {/* Actions */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
+          <Button
+            onClick={() => setAiSearchOpen(true)}
+            size="sm"
+            className="hidden h-8 gap-1.5 px-3 text-xs sm:flex"
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            AI-подбор
+          </Button>
+          <Button
+            onClick={() => setAiSearchOpen(true)}
+            size="icon"
+            className="h-8 w-8 sm:hidden"
+          >
+            <Sparkles className="h-4 w-4" />
+          </Button>
           <Link to="/favorites">
             <Button 
               variant="ghost" 
@@ -167,6 +185,8 @@ export const Header = () => {
           )}
         </nav>
       </div>
+      
+      <AISearchDialog open={aiSearchOpen} onOpenChange={setAiSearchOpen} />
     </header>
   );
 };
