@@ -14,7 +14,6 @@ import DeveloperDetail from "./pages/DeveloperDetail";
 import News from "./pages/News";
 import NewsDetail from "./pages/NewsDetail";
 import Favorites from "./pages/Favorites";
-import MapPage from "./pages/Map";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,7 +36,6 @@ const App = () => (
               <Route path="/news" element={<News />} />
               <Route path="/news/:slug" element={<NewsDetail />} />
               <Route path="/favorites" element={<Favorites />} />
-              <Route path="/map" element={<MapPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
