@@ -131,6 +131,12 @@ export const Header = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-40 animate-in fade-in-0 zoom-in-95 duration-200">
+                <DropdownMenuItem asChild>
+                  <Link to="/profile" className="cursor-pointer gap-2">
+                    <User className="h-4 w-4" />
+                    Профиль
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer gap-2 text-destructive focus:text-destructive">
                   <LogOut className="h-4 w-4" />
                   Выйти
@@ -175,7 +181,14 @@ export const Header = () => {
               </Button>
             </Link>
           ))}
-          {!user && (
+          {user ? (
+            <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
+              <Button variant="ghost" className="w-full justify-start gap-2 h-10 text-sm">
+                <User className="h-4 w-4 text-muted-foreground" />
+                Профиль
+              </Button>
+            </Link>
+          ) : (
             <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
               <Button variant="ghost" className="w-full justify-start gap-2 h-10 text-sm">
                 <User className="h-4 w-4 text-muted-foreground" />

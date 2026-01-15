@@ -305,30 +305,42 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          email_notifications: boolean | null
           full_name: string | null
           id: string
+          new_complexes_alerts: boolean | null
           phone: string | null
           preferred_city_id: string | null
+          price_alerts: boolean | null
+          push_notifications: boolean | null
           updated_at: string
           user_id: string
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          email_notifications?: boolean | null
           full_name?: string | null
           id?: string
+          new_complexes_alerts?: boolean | null
           phone?: string | null
           preferred_city_id?: string | null
+          price_alerts?: boolean | null
+          push_notifications?: boolean | null
           updated_at?: string
           user_id: string
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
+          email_notifications?: boolean | null
           full_name?: string | null
           id?: string
+          new_complexes_alerts?: boolean | null
           phone?: string | null
           preferred_city_id?: string | null
+          price_alerts?: boolean | null
+          push_notifications?: boolean | null
           updated_at?: string
           user_id?: string
         }
@@ -473,6 +485,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      saved_searches: {
+        Row: {
+          city_id: string | null
+          created_at: string
+          districts: string[] | null
+          id: string
+          max_price: number | null
+          min_price: number | null
+          name: string
+          rooms: number[] | null
+          user_id: string
+        }
+        Insert: {
+          city_id?: string | null
+          created_at?: string
+          districts?: string[] | null
+          id?: string
+          max_price?: number | null
+          min_price?: number | null
+          name: string
+          rooms?: number[] | null
+          user_id: string
+        }
+        Update: {
+          city_id?: string | null
+          created_at?: string
+          districts?: string[] | null
+          id?: string
+          max_price?: number | null
+          min_price?: number | null
+          name?: string
+          rooms?: number[] | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      view_history: {
+        Row: {
+          complex_id: string
+          id: string
+          user_id: string
+          viewed_at: string
+        }
+        Insert: {
+          complex_id: string
+          id?: string
+          user_id: string
+          viewed_at?: string
+        }
+        Update: {
+          complex_id?: string
+          id?: string
+          user_id?: string
+          viewed_at?: string
+        }
+        Relationships: []
       }
     }
     Views: {

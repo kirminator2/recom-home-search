@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ResidentialComplex, Apartment, Review } from "@/types/database";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useAuth } from "@/hooks/useAuth";
+import { useViewHistory } from "@/hooks/useViewHistory";
 import {
   MapPin,
   Star,
@@ -49,6 +50,7 @@ const formatPriceShort = (price: number) => {
 const ComplexDetail = () => {
   const { slug } = useParams();
   const { user } = useAuth();
+  const { trackView } = useViewHistory();
   const [complex, setComplex] = useState<ResidentialComplex | null>(null);
   const [apartments, setApartments] = useState<Apartment[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -98,6 +100,9 @@ const ComplexDetail = () => {
       setComplex(complexData as ResidentialComplex);
       setMortgageCalc(prev => ({ ...prev, price: complexData.price_from || 5000000 }));
       setInstallmentCalc(prev => ({ ...prev, price: complexData.price_from || 5000000 }));
+      
+      // Track view in history
+      trackView(complexData.id);
 
       // Fetch apartments
       const { data: apartmentsData } = await supabase
