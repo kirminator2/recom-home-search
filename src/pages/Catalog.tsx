@@ -1,12 +1,14 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect, useMemo } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { PropertyCard } from "@/components/home/PropertyCard";
+import { PropertyMap } from "@/components/map/PropertyMap";
+import { MapFilters } from "@/components/map/MapFilters";
 import { supabase } from "@/integrations/supabase/client";
 import { useCities } from "@/hooks/useCities";
 import { ResidentialComplex } from "@/types/database";
-import { Search, SlidersHorizontal, Building2, LayoutGrid, Map } from "lucide-react";
+import { Search, Building2, LayoutGrid, Map } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,12 +22,17 @@ import {
 type ViewMode = "list" | "map";
 
 const Catalog = () => {
+  const navigate = useNavigate();
   const [complexes, setComplexes] = useState<ResidentialComplex[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("price_asc");
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const { selectedCity } = useCities();
+
+  // Map filters state
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000000]);
+  const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
 
   useEffect(() => {
     fetchComplexes();
@@ -44,27 +51,69 @@ const Catalog = () => {
 
     if (!error && data) {
       setComplexes(data as ResidentialComplex[]);
+      // Set initial price range based on data
+      const prices = data.map(c => c.price_from || 0).filter(p => p > 0);
+      if (prices.length > 0) {
+        const maxP = Math.max(...prices) * 1.2;
+        setPriceRange([0, maxP]);
+      }
     }
     setLoading(false);
   };
 
-  const filteredComplexes = complexes
-    .filter((c) =>
-      c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.district?.toLowerCase().includes(search.toLowerCase())
-    )
-    .sort((a, b) => {
-      switch (sortBy) {
-        case "price_asc":
-          return (a.price_from || 0) - (b.price_from || 0);
-        case "price_desc":
-          return (b.price_from || 0) - (a.price_from || 0);
-        case "rating":
-          return (b.rating || 0) - (a.rating || 0);
-        default:
-          return 0;
-      }
-    });
+  // Get available districts
+  const availableDistricts = useMemo(() => {
+    const districts = complexes
+      .map(c => c.district)
+      .filter((d): d is string => Boolean(d));
+    return [...new Set(districts)].sort();
+  }, [complexes]);
+
+  // Max price for slider
+  const maxPrice = useMemo(() => {
+    const prices = complexes.map(c => c.price_from || 0);
+    return Math.max(...prices, 50000000) * 1.2;
+  }, [complexes]);
+
+  const filteredComplexes = useMemo(() => {
+    return complexes
+      .filter((c) => {
+        const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase()) ||
+          c.district?.toLowerCase().includes(search.toLowerCase());
+        
+        // Apply map filters only in map view
+        if (viewMode === "map") {
+          const matchesPrice = (c.price_from || 0) >= priceRange[0] && 
+                               (c.price_from || 0) <= priceRange[1];
+          const matchesDistrict = selectedDistricts.length === 0 || 
+                                  selectedDistricts.includes(c.district || "");
+          return matchesSearch && matchesPrice && matchesDistrict;
+        }
+        
+        return matchesSearch;
+      })
+      .sort((a, b) => {
+        switch (sortBy) {
+          case "price_asc":
+            return (a.price_from || 0) - (b.price_from || 0);
+          case "price_desc":
+            return (b.price_from || 0) - (a.price_from || 0);
+          case "rating":
+            return (b.rating || 0) - (a.rating || 0);
+          default:
+            return 0;
+        }
+      });
+  }, [complexes, search, sortBy, viewMode, priceRange, selectedDistricts]);
+
+  const handleComplexClick = (complex: ResidentialComplex) => {
+    navigate(`/complex/${complex.slug}`);
+  };
+
+  const resetFilters = () => {
+    setPriceRange([0, maxPrice]);
+    setSelectedDistricts([]);
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -104,9 +153,6 @@ const Catalog = () => {
                     <SelectItem value="rating">По рейтингу</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button variant="outline" size="icon" className="h-9 w-9 shrink-0 border-0 bg-secondary/50">
-                  <SlidersHorizontal className="h-4 w-4" />
-                </Button>
               </div>
             </div>
 
@@ -169,16 +215,32 @@ const Catalog = () => {
                 </div>
               )
             ) : (
-              <div className="relative aspect-[16/9] min-h-[500px] rounded-xl bg-secondary/30 overflow-hidden">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <Map className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                    <p className="mt-3 text-sm text-muted-foreground">
-                      Карта с объектами появится здесь
-                    </p>
+              <div className="relative min-h-[600px] rounded-xl overflow-hidden">
+                {/* Map Filters */}
+                <div className="absolute top-4 left-4 z-10">
+                  <MapFilters
+                    priceRange={priceRange}
+                    maxPrice={maxPrice}
+                    onPriceChange={setPriceRange}
+                    selectedDistricts={selectedDistricts}
+                    availableDistricts={availableDistricts}
+                    onDistrictChange={setSelectedDistricts}
+                    onReset={resetFilters}
+                  />
+                </div>
+                
+                {/* Results count */}
+                <div className="absolute top-4 right-4 z-10">
+                  <div className="bg-background/90 backdrop-blur-sm rounded-lg px-3 py-1.5 text-sm">
+                    {filteredComplexes.length} объектов
                   </div>
                 </div>
-                {/* Map placeholder - integrate with map service */}
+
+                <PropertyMap
+                  complexes={filteredComplexes}
+                  onComplexClick={handleComplexClick}
+                  className="h-[600px]"
+                />
               </div>
             )}
           </div>
