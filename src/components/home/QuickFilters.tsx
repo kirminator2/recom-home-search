@@ -1,45 +1,29 @@
-import { 
-  Building, 
-  Home, 
-  Wallet, 
-  Train, 
-  TreePine, 
-  Waves,
-  GraduationCap,
-  Baby
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const filters = [
-  { icon: Building, label: "Бизнес-класс", color: "text-primary" },
-  { icon: Wallet, label: "До 10 млн ₽", color: "text-trust" },
-  { icon: Home, label: "Студии", color: "text-accent" },
-  { icon: Train, label: "У метро", color: "text-destructive" },
-  { icon: TreePine, label: "В парке", color: "text-trust" },
-  { icon: Waves, label: "У воды", color: "text-primary" },
-  { icon: GraduationCap, label: "Рядом школы", color: "text-accent" },
-  { icon: Baby, label: "Для семьи", color: "text-destructive" },
+  { label: "Студии", href: "/catalog?rooms=studio" },
+  { label: "До 10 млн ₽", href: "/catalog?max=10000000" },
+  { label: "Сдан", href: "/catalog?deadline=done" },
+  { label: "Рядом с метро", href: "/catalog?metro=1" },
+  { label: "Бизнес-класс", href: "/catalog?class=business" },
+  { label: "С отделкой", href: "/catalog?finish=1" },
 ];
 
 export const QuickFilters = () => {
   return (
-    <section className="border-b border-border bg-secondary/50 py-6">
+    <section className="border-b border-border py-3">
       <div className="container">
-        <div className="flex items-center gap-4 overflow-x-auto pb-2 scrollbar-hide">
-          <span className="shrink-0 text-sm font-medium text-muted-foreground">
-            Популярные:
-          </span>
+        <div className="flex items-center gap-3 overflow-x-auto">
+          <span className="shrink-0 text-xs text-muted-foreground">Популярное:</span>
           <div className="flex gap-2">
-            {filters.map((filter) => (
-              <Button
-                key={filter.label}
-                variant="secondary"
-                size="sm"
-                className="shrink-0 gap-2 rounded-full bg-card shadow-sm hover:shadow-card"
+            {filters.map((f) => (
+              <Link
+                key={f.label}
+                to={f.href}
+                className="shrink-0 rounded-md border border-border px-3 py-1.5 text-xs text-foreground hover:bg-secondary transition-colors"
               >
-                <filter.icon className={`h-4 w-4 ${filter.color}`} />
-                {filter.label}
-              </Button>
+                {f.label}
+              </Link>
             ))}
           </div>
         </div>

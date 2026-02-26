@@ -1,5 +1,5 @@
-import { ArrowRight, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import { PropertyCard, Property } from "./PropertyCard";
 
 const featuredProperties: Property[] = [
@@ -62,40 +62,29 @@ const featuredProperties: Property[] = [
 
 export const FeaturedProperties = () => {
   return (
-    <section className="py-16 sm:py-20">
+    <section className="py-10 sm:py-14">
       <div className="container">
-        {/* Section Header */}
-        <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mb-6 flex items-end justify-between">
           <div>
-            <div className="mb-2 flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-accent" />
-              <span className="text-sm font-medium text-accent">
-                Рекомендации ИИ
-              </span>
-            </div>
-            <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
-              Подобрано для вас
+            <h2 className="text-xl font-semibold text-foreground sm:text-2xl">
+              Рекомендуемые ЖК
             </h2>
-            <p className="mt-2 text-muted-foreground">
-              На основе ваших предпочтений и популярных запросов
+            <p className="mt-1 text-sm text-muted-foreground">
+              На основе популярных запросов
             </p>
           </div>
-          <Button variant="outline" className="gap-2 self-start">
+          <Link
+            to="/catalog"
+            className="flex items-center gap-1 text-sm text-primary hover:underline"
+          >
             Все новостройки
-            <ArrowRight className="h-4 w-4" />
-          </Button>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
         </div>
 
-        {/* Properties Grid */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {featuredProperties.map((property, index) => (
-            <div
-              key={property.id}
-              className="animate-slide-up"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <PropertyCard property={property} />
-            </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {featuredProperties.map((property) => (
+            <PropertyCard key={property.id} property={property} />
           ))}
         </div>
       </div>

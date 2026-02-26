@@ -1,6 +1,4 @@
 import { Heart, MapPin, Calendar, Star } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useFavorites } from "@/hooks/useFavorites";
 
 export interface Property {
@@ -41,68 +39,54 @@ export const PropertyCard = ({ property }: PropertyCardProps) => {
   };
 
   return (
-    <article className="group relative overflow-hidden rounded-xl bg-card transition-all duration-300 ease-out hover:shadow-hover">
-      {/* Image Container */}
-      <div className="relative aspect-[4/3] overflow-hidden">
+    <article className="group border border-border rounded-lg overflow-hidden bg-card hover:shadow-hover transition-shadow">
+      {/* Image */}
+      <div className="relative aspect-[16/10] overflow-hidden">
         <img
           src={property.imageUrl}
           alt={property.name}
-          className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+          loading="lazy"
         />
-        
-        {/* Subtle gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60" />
 
         {/* Badges */}
-        <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
+        <div className="absolute left-2 top-2 flex gap-1">
           {property.hasPromo && (
-            <Badge className="bg-accent/90 text-accent-foreground border-0 text-xs font-medium backdrop-blur-sm">
+            <span className="rounded bg-primary px-2 py-0.5 text-[11px] font-medium text-primary-foreground">
               Акция
-            </Badge>
+            </span>
           )}
           {property.isNew && (
-            <Badge className="bg-trust/90 text-primary-foreground border-0 text-xs font-medium backdrop-blur-sm">
+            <span className="rounded bg-trust px-2 py-0.5 text-[11px] font-medium text-primary-foreground">
               Новый
-            </Badge>
+            </span>
           )}
         </div>
 
-        {/* Favorite Button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className={`absolute right-3 top-3 h-8 w-8 rounded-full bg-white/90 backdrop-blur-sm transition-all duration-200 hover:bg-white hover:scale-105 ${
-            isLiked ? "text-primary" : "text-muted-foreground"
-          }`}
+        {/* Favorite */}
+        <button
+          className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-background/80 backdrop-blur-sm transition-colors hover:bg-background"
           onClick={handleFavoriteClick}
         >
-          <Heart className={`h-4 w-4 transition-all duration-200 ${isLiked ? "fill-current scale-110" : ""}`} />
-        </Button>
+          <Heart className={`h-3.5 w-3.5 ${isLiked ? "fill-primary text-primary" : "text-muted-foreground"}`} />
+        </button>
 
-        {/* Price Tag */}
-        <div className="absolute bottom-3 left-3">
-          <div className="inline-flex items-baseline rounded-lg bg-white/95 px-2.5 py-1 backdrop-blur-sm">
-            <span className="text-sm font-semibold text-foreground">
-              от {formatPrice(property.priceFrom)} ₽
-            </span>
-          </div>
+        {/* Price */}
+        <div className="absolute bottom-2 left-2">
+          <span className="rounded bg-background/90 px-2 py-1 text-xs font-semibold text-foreground backdrop-blur-sm">
+            от {formatPrice(property.priceFrom)} ₽
+          </span>
         </div>
       </div>
 
       {/* Content */}
-      <div className="p-3.5">
-        {/* Title & Developer */}
-        <div className="mb-2.5">
-          <h3 className="mb-0.5 text-base font-semibold text-foreground line-clamp-1 transition-colors duration-200 group-hover:text-primary">
-            {property.name}
-          </h3>
-          <p className="text-xs text-muted-foreground">
-            {property.developer}
-          </p>
-        </div>
+      <div className="p-3">
+        <h3 className="text-sm font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+          {property.name}
+        </h3>
+        <p className="mt-0.5 text-xs text-muted-foreground">{property.developer}</p>
 
-        {/* Info */}
-        <div className="mb-3 flex items-center gap-3 text-xs text-muted-foreground">
+        <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
             <MapPin className="h-3 w-3" />
             {property.district}
@@ -113,15 +97,10 @@ export const PropertyCard = ({ property }: PropertyCardProps) => {
           </span>
         </div>
 
-        {/* Rating */}
-        <div className="flex items-center gap-1.5 pt-2.5 border-t border-border/50">
-          <Star className="h-3.5 w-3.5 fill-accent text-accent" />
-          <span className="text-sm font-medium text-foreground">
-            {property.rating?.toFixed(1) || "0.0"}
-          </span>
-          <span className="text-xs text-muted-foreground">
-            ({property.reviewsCount || 0})
-          </span>
+        <div className="mt-2 flex items-center gap-1 pt-2 border-t border-border">
+          <Star className="h-3 w-3 fill-primary text-primary" />
+          <span className="text-xs font-medium">{property.rating?.toFixed(1)}</span>
+          <span className="text-xs text-muted-foreground">({property.reviewsCount})</span>
         </div>
       </div>
     </article>
