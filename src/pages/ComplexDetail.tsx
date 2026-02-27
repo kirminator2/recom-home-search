@@ -11,7 +11,7 @@ import { useViewHistory } from "@/hooks/useViewHistory";
 import {
   MapPin, Star, Heart, Calendar, Building2, Check, ChevronRight,
   Phone, Video, Calculator, ThumbsUp, ThumbsDown, Gift, Send,
-  MessageSquare,
+  MessageSquare, X, Maximize2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { PropertyCard } from "@/components/home/PropertyCard";
 import { toast } from "@/hooks/use-toast";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
 
 const formatPrice = (price: number) => {
   if (price >= 1000000) return `${(price / 1000000).toFixed(1)} млн ₽`;
@@ -30,6 +33,14 @@ const formatPrice = (price: number) => {
 const formatPriceShort = (price: number) => {
   if (price >= 1000000) return `${(price / 1000000).toFixed(2)} млн ₽`;
   return `${price.toLocaleString("ru-RU")} ₽`;
+};
+
+const getRoomLabel = (rooms: number) => {
+  if (rooms === 0) return "Студии";
+  if (rooms === 1) return "1-комнатные";
+  if (rooms === 2) return "2-комнатные";
+  if (rooms === 3) return "3-комнатные";
+  return `${rooms}-комнатные`;
 };
 
 const ComplexDetail = () => {
@@ -46,6 +57,9 @@ const ComplexDetail = () => {
 
   const [reviewForm, setReviewForm] = useState({ name: "", rating: 5, pros: "", cons: "", text: "" });
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [selectedApt, setSelectedApt] = useState<Apartment | null>(null);
+  const [aptModalOpen, setAptModalOpen] = useState(false);
+  const [aptModalApt, setAptModalApt] = useState<Apartment | null>(null);
 
   const [mortgageCalc, setMortgageCalc] = useState({ price: 5000000, downPayment: 1000000, rate: 8, years: 20 });
   const [installmentCalc, setInstallmentCalc] = useState({ price: 5000000, downPayment: 1500000, months: 24 });
@@ -241,30 +255,127 @@ const ComplexDetail = () => {
                 </TabsList>
 
                 {/* Apartments */}
-                <TabsContent value="apartments" className="space-y-3">
+                <TabsContent value="apartments" className="space-y-0">
                   {Object.entries(groupedApartments).length > 0 ? (
-                    Object.entries(groupedApartments).map(([rooms, apts]) => (
-                      <div key={rooms} className="rounded-lg border border-border p-3">
-                        <h3 className="mb-2 text-xs font-medium text-muted-foreground">
-                          {rooms === "1" ? "Студии и 1-комнатные" : `${rooms}-комнатные`}
-                        </h3>
-                        <div className="space-y-1.5">
-                          {apts.map((apt) => (
-                            <div key={apt.id} className="flex items-center justify-between rounded-md bg-secondary/50 p-2.5 hover:bg-secondary transition-colors cursor-pointer">
-                              <div>
-                                <p className="text-sm font-medium">{apt.area} м²</p>
-                                <p className="text-[11px] text-muted-foreground">{apt.floor}/{apt.total_floors} этаж</p>
+                    <div className="flex gap-4">
+                      {/* Left: compact table */}
+                      <div className="flex-1 min-w-0">
+                        {Object.entries(groupedApartments).map(([rooms, apts]) => {
+                          const minArea = Math.min(...apts.map(a => a.area));
+                          const maxArea = Math.max(...apts.map(a => a.area));
+                          return (
+                            <div key={rooms} className="mb-4">
+                              <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                {getRoomLabel(Number(rooms))}{" "}
+                                <span className="font-normal normal-case">от {minArea} до {maxArea} м²</span>
+                              </h3>
+                              <div className="border border-border rounded-md overflow-hidden">
+                                <table className="w-full text-sm">
+                                  <thead>
+                                    <tr className="border-b border-border bg-secondary/30">
+                                      <th className="text-left px-3 py-1.5 text-[11px] font-medium text-muted-foreground w-10"></th>
+                                      <th className="text-left px-3 py-1.5 text-[11px] font-medium text-muted-foreground">Площадь</th>
+                                      <th className="text-left px-3 py-1.5 text-[11px] font-medium text-muted-foreground">Этаж</th>
+                                      <th className="text-left px-3 py-1.5 text-[11px] font-medium text-muted-foreground">Срок сдачи</th>
+                                      <th className="text-right px-3 py-1.5 text-[11px] font-medium text-primary">Стоимость</th>
+                                      <th className="w-8"></th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {apts.map((apt) => (
+                                      <tr
+                                        key={apt.id}
+                                        className={`border-b border-border last:border-0 cursor-pointer transition-colors hover:bg-secondary/40 ${selectedApt?.id === apt.id ? "bg-primary/5" : ""}`}
+                                        onClick={() => setSelectedApt(apt)}
+                                      >
+                                        <td className="px-3 py-2">
+                                          {apt.layout_url ? (
+                                            <img src={apt.layout_url} alt="План" className="h-8 w-8 object-contain rounded border border-border" />
+                                          ) : (
+                                            <div className="h-8 w-8 rounded border border-border bg-secondary/50 flex items-center justify-center">
+                                              <Building2 className="h-3.5 w-3.5 text-muted-foreground/40" />
+                                            </div>
+                                          )}
+                                        </td>
+                                        <td className="px-3 py-2">
+                                          <span className="font-medium text-primary">{apt.area} м²</span>
+                                        </td>
+                                        <td className="px-3 py-2 text-muted-foreground text-xs">
+                                          {apt.floor}/{apt.total_floors}
+                                        </td>
+                                        <td className="px-3 py-2 text-xs text-muted-foreground">
+                                          {complex?.completion_date || "—"}
+                                        </td>
+                                        <td className="px-3 py-2 text-right font-medium">
+                                          {apt.price.toLocaleString("ru-RU")} ₽
+                                        </td>
+                                        <td className="px-1 py-2">
+                                          <button
+                                            className="text-primary hover:underline text-xs"
+                                            onClick={(e) => { e.stopPropagation(); setAptModalApt(apt); setAptModalOpen(true); }}
+                                          >
+                                            Подробнее
+                                          </button>
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
                               </div>
-                              <div className="text-right">
-                                <p className="text-sm font-semibold">{formatPrice(apt.price)}</p>
-                                <p className="text-[11px] text-muted-foreground">{apt.price_per_sqm?.toLocaleString("ru-RU")} ₽/м²</p>
-                              </div>
-                              <ChevronRight className="h-4 w-4 text-muted-foreground" />
                             </div>
-                          ))}
-                        </div>
+                          );
+                        })}
                       </div>
-                    ))
+
+                      {/* Right: selected layout preview */}
+                      {selectedApt && (
+                        <div className="hidden md:block w-[260px] shrink-0 sticky top-20 self-start">
+                          <div className="rounded-lg border border-border p-3">
+                            <div className="aspect-square rounded bg-secondary/30 border border-border flex items-center justify-center mb-3 overflow-hidden relative group">
+                              {selectedApt.layout_url ? (
+                                <>
+                                  <img src={selectedApt.layout_url} alt="Планировка" className="max-h-full max-w-full object-contain" />
+                                  <button
+                                    className="absolute top-2 right-2 h-7 w-7 bg-background/80 rounded-md border border-border flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                    onClick={() => { setAptModalApt(selectedApt); setAptModalOpen(true); }}
+                                  >
+                                    <Maximize2 className="h-3.5 w-3.5" />
+                                  </button>
+                                </>
+                              ) : (
+                                <div className="text-center">
+                                  <Building2 className="mx-auto h-8 w-8 text-muted-foreground/30" />
+                                  <p className="text-[10px] text-muted-foreground mt-1">Планировка недоступна</p>
+                                </div>
+                              )}
+                            </div>
+                            <div className="space-y-1.5">
+                              <p className="text-sm font-semibold">
+                                {Number(selectedApt.rooms) === 0 ? "Студия" : `${selectedApt.rooms}-комн.`} {selectedApt.area} м²
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {selectedApt.floor} этаж (из {selectedApt.total_floors})
+                              </p>
+                              <p className="text-base font-semibold text-foreground">
+                                {selectedApt.price.toLocaleString("ru-RU")} ₽
+                              </p>
+                              {selectedApt.price_per_sqm && (
+                                <p className="text-[11px] text-muted-foreground">
+                                  {selectedApt.price_per_sqm.toLocaleString("ru-RU")} ₽/м²
+                                </p>
+                              )}
+                              <Button
+                                size="sm"
+                                className="w-full mt-2 text-xs gap-1.5"
+                                onClick={() => { setAptModalApt(selectedApt); setAptModalOpen(true); }}
+                              >
+                                <Maximize2 className="h-3 w-3" /> Подробнее
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   ) : (
                     <div className="py-10 text-center">
                       <Building2 className="mx-auto h-8 w-8 text-muted-foreground/40" />
@@ -272,6 +383,67 @@ const ComplexDetail = () => {
                     </div>
                   )}
                 </TabsContent>
+
+                {/* Apartment Detail Modal */}
+                <Dialog open={aptModalOpen} onOpenChange={setAptModalOpen}>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>
+                        {aptModalApt && (Number(aptModalApt.rooms) === 0 ? "Студия" : `${aptModalApt.rooms}-комн. квартира`)}
+                        {aptModalApt && `, ${aptModalApt.area} м²`}
+                      </DialogTitle>
+                    </DialogHeader>
+                    {aptModalApt && (
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="sm:w-1/2">
+                          <div className="aspect-square rounded-lg bg-secondary/30 border border-border flex items-center justify-center overflow-hidden">
+                            {aptModalApt.layout_url ? (
+                              <img src={aptModalApt.layout_url} alt="Планировка" className="max-h-full max-w-full object-contain" />
+                            ) : (
+                              <div className="text-center">
+                                <Building2 className="mx-auto h-10 w-10 text-muted-foreground/30" />
+                                <p className="text-xs text-muted-foreground mt-2">Планировка недоступна</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="sm:w-1/2 space-y-3">
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">Площадь</span>
+                              <span className="font-medium">{aptModalApt.area} м²</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">Этаж</span>
+                              <span className="font-medium">{aptModalApt.floor} из {aptModalApt.total_floors}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">Срок сдачи</span>
+                              <span className="font-medium">{complex?.completion_date || "—"}</span>
+                            </div>
+                            {aptModalApt.price_per_sqm && (
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">Цена за м²</span>
+                                <span className="font-medium">{aptModalApt.price_per_sqm.toLocaleString("ru-RU")} ₽</span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="border-t border-border pt-3">
+                            <p className="text-xl font-bold">{aptModalApt.price.toLocaleString("ru-RU")} ₽</p>
+                          </div>
+                          <div className="flex gap-2 pt-1">
+                            <Button className="flex-1 gap-1.5 text-xs" size="sm">
+                              <MessageSquare className="h-3.5 w-3.5" /> Запросить
+                            </Button>
+                            <Button variant="outline" className="gap-1.5 text-xs" size="sm">
+                              <Phone className="h-3.5 w-3.5" /> Позвонить
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </DialogContent>
+                </Dialog>
 
                 {/* About */}
                 <TabsContent value="about" className="space-y-3">
