@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
@@ -244,379 +244,503 @@ const ComplexDetail = () => {
                 </div>
               </div>
 
-              {/* Tabs */}
-              <Tabs defaultValue="apartments" className="space-y-4">
-                <TabsList className="w-full justify-start overflow-x-auto bg-secondary/50 p-0.5 h-auto">
-                  <TabsTrigger value="apartments" className="text-xs h-8">Квартиры ({apartments.length})</TabsTrigger>
-                  <TabsTrigger value="about" className="text-xs h-8">О комплексе</TabsTrigger>
-                  <TabsTrigger value="calculator" className="text-xs h-8">Калькулятор</TabsTrigger>
-                  <TabsTrigger value="reviews" className="text-xs h-8">Отзывы ({reviews.length})</TabsTrigger>
-                  <TabsTrigger value="developer" className="text-xs h-8">Застройщик</TabsTrigger>
-                </TabsList>
+              {/* Section Nav */}
+              <nav className="sticky top-0 z-20 bg-background border-b border-border mb-6 -mx-4 px-4 sm:-mx-5 sm:px-5">
+                <div className="flex gap-1 overflow-x-auto py-2">
+                  {[
+                    { id: "apartments", label: `Квартиры (${apartments.length})` },
+                    { id: "about", label: "О комплексе" },
+                    { id: "mortgage", label: "Ипотека" },
+                    { id: "installment", label: "Рассрочка" },
+                    { id: "reviews", label: `Отзывы (${reviews.length})` },
+                    { id: "developer", label: "Застройщик" },
+                  ].map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => document.getElementById(s.id)?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                      className="shrink-0 rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              </nav>
 
-                {/* Apartments */}
-                <TabsContent value="apartments" className="space-y-0">
-                  {Object.entries(groupedApartments).length > 0 ? (
-                    <div className="flex gap-4">
-                      {/* Left: compact table */}
-                      <div className="flex-1 min-w-0">
-                        {Object.entries(groupedApartments).map(([rooms, apts]) => {
-                          const minArea = Math.min(...apts.map(a => a.area));
-                          const maxArea = Math.max(...apts.map(a => a.area));
-                          return (
-                            <div key={rooms} className="mb-4">
-                              <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                                {getRoomLabel(Number(rooms))}{" "}
-                                <span className="font-normal normal-case">от {minArea} до {maxArea} м²</span>
-                              </h3>
-                              <div className="border border-border rounded-md overflow-hidden">
-                                <table className="w-full text-sm">
-                                  <thead>
-                                    <tr className="border-b border-border bg-secondary/30">
-                                      <th className="text-left px-3 py-1.5 text-[11px] font-medium text-muted-foreground w-10"></th>
-                                      <th className="text-left px-3 py-1.5 text-[11px] font-medium text-muted-foreground">Площадь</th>
-                                      <th className="text-left px-3 py-1.5 text-[11px] font-medium text-muted-foreground">Этаж</th>
-                                      <th className="text-left px-3 py-1.5 text-[11px] font-medium text-muted-foreground">Срок сдачи</th>
-                                      <th className="text-right px-3 py-1.5 text-[11px] font-medium text-primary">Стоимость</th>
-                                      <th className="w-8"></th>
+              {/* === APARTMENTS === */}
+              <section id="apartments" className="scroll-mt-16 mb-10">
+                <h2 className="text-base font-semibold mb-3">Квартиры</h2>
+                {Object.entries(groupedApartments).length > 0 ? (
+                  <div className="flex gap-4">
+                    {/* Left: compact table */}
+                    <div className="flex-1 min-w-0">
+                      {Object.entries(groupedApartments).map(([rooms, apts]) => {
+                        const minArea = Math.min(...apts.map(a => a.area));
+                        const maxArea = Math.max(...apts.map(a => a.area));
+                        return (
+                          <div key={rooms} className="mb-4">
+                            <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                              {getRoomLabel(Number(rooms))}{" "}
+                              <span className="font-normal normal-case">от {minArea} до {maxArea} м²</span>
+                            </h3>
+                            <div className="border border-border rounded-md overflow-hidden">
+                              <table className="w-full text-sm">
+                                <thead>
+                                  <tr className="border-b border-border bg-secondary/30">
+                                    <th className="text-left px-3 py-1.5 text-[11px] font-medium text-muted-foreground w-10"></th>
+                                    <th className="text-left px-3 py-1.5 text-[11px] font-medium text-muted-foreground">Площадь</th>
+                                    <th className="text-left px-3 py-1.5 text-[11px] font-medium text-muted-foreground">Этаж</th>
+                                    <th className="text-left px-3 py-1.5 text-[11px] font-medium text-muted-foreground">Срок сдачи</th>
+                                    <th className="text-right px-3 py-1.5 text-[11px] font-medium text-primary">Стоимость</th>
+                                    <th className="w-8"></th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {apts.map((apt) => (
+                                    <tr
+                                      key={apt.id}
+                                      className={`border-b border-border last:border-0 cursor-pointer transition-colors hover:bg-secondary/40 ${selectedApt?.id === apt.id ? "bg-primary/5" : ""}`}
+                                      onClick={() => setSelectedApt(apt)}
+                                    >
+                                      <td className="px-3 py-2">
+                                        {apt.layout_url ? (
+                                          <img src={apt.layout_url} alt="План" className="h-8 w-8 object-contain rounded border border-border" />
+                                        ) : (
+                                          <div className="h-8 w-8 rounded border border-border bg-secondary/50 flex items-center justify-center">
+                                            <Building2 className="h-3.5 w-3.5 text-muted-foreground/40" />
+                                          </div>
+                                        )}
+                                      </td>
+                                      <td className="px-3 py-2">
+                                        <span className="font-medium text-primary">{apt.area} м²</span>
+                                      </td>
+                                      <td className="px-3 py-2 text-muted-foreground text-xs">
+                                        {apt.floor}/{apt.total_floors}
+                                      </td>
+                                      <td className="px-3 py-2 text-xs text-muted-foreground">
+                                        {complex?.completion_date || "—"}
+                                      </td>
+                                      <td className="px-3 py-2 text-right font-medium">
+                                        {apt.price.toLocaleString("ru-RU")} ₽
+                                      </td>
+                                      <td className="px-1 py-2">
+                                        <button
+                                          className="text-primary hover:underline text-xs"
+                                          onClick={(e) => { e.stopPropagation(); setAptModalApt(apt); setAptModalOpen(true); }}
+                                        >
+                                          Подробнее
+                                        </button>
+                                      </td>
                                     </tr>
-                                  </thead>
-                                  <tbody>
-                                    {apts.map((apt) => (
-                                      <tr
-                                        key={apt.id}
-                                        className={`border-b border-border last:border-0 cursor-pointer transition-colors hover:bg-secondary/40 ${selectedApt?.id === apt.id ? "bg-primary/5" : ""}`}
-                                        onClick={() => setSelectedApt(apt)}
-                                      >
-                                        <td className="px-3 py-2">
-                                          {apt.layout_url ? (
-                                            <img src={apt.layout_url} alt="План" className="h-8 w-8 object-contain rounded border border-border" />
-                                          ) : (
-                                            <div className="h-8 w-8 rounded border border-border bg-secondary/50 flex items-center justify-center">
-                                              <Building2 className="h-3.5 w-3.5 text-muted-foreground/40" />
-                                            </div>
-                                          )}
-                                        </td>
-                                        <td className="px-3 py-2">
-                                          <span className="font-medium text-primary">{apt.area} м²</span>
-                                        </td>
-                                        <td className="px-3 py-2 text-muted-foreground text-xs">
-                                          {apt.floor}/{apt.total_floors}
-                                        </td>
-                                        <td className="px-3 py-2 text-xs text-muted-foreground">
-                                          {complex?.completion_date || "—"}
-                                        </td>
-                                        <td className="px-3 py-2 text-right font-medium">
-                                          {apt.price.toLocaleString("ru-RU")} ₽
-                                        </td>
-                                        <td className="px-1 py-2">
-                                          <button
-                                            className="text-primary hover:underline text-xs"
-                                            onClick={(e) => { e.stopPropagation(); setAptModalApt(apt); setAptModalOpen(true); }}
-                                          >
-                                            Подробнее
-                                          </button>
-                                        </td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-
-                      {/* Right: selected layout preview */}
-                      {selectedApt && (
-                        <div className="hidden md:block w-[260px] shrink-0 sticky top-20 self-start">
-                          <div className="rounded-lg border border-border p-3">
-                            <div className="aspect-square rounded bg-secondary/30 border border-border flex items-center justify-center mb-3 overflow-hidden relative group">
-                              {selectedApt.layout_url ? (
-                                <>
-                                  <img src={selectedApt.layout_url} alt="Планировка" className="max-h-full max-w-full object-contain" />
-                                  <button
-                                    className="absolute top-2 right-2 h-7 w-7 bg-background/80 rounded-md border border-border flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                    onClick={() => { setAptModalApt(selectedApt); setAptModalOpen(true); }}
-                                  >
-                                    <Maximize2 className="h-3.5 w-3.5" />
-                                  </button>
-                                </>
-                              ) : (
-                                <div className="text-center">
-                                  <Building2 className="mx-auto h-8 w-8 text-muted-foreground/30" />
-                                  <p className="text-[10px] text-muted-foreground mt-1">Планировка недоступна</p>
-                                </div>
-                              )}
-                            </div>
-                            <div className="space-y-1.5">
-                              <p className="text-sm font-semibold">
-                                {Number(selectedApt.rooms) === 0 ? "Студия" : `${selectedApt.rooms}-комн.`} {selectedApt.area} м²
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {selectedApt.floor} этаж (из {selectedApt.total_floors})
-                              </p>
-                              <p className="text-base font-semibold text-foreground">
-                                {selectedApt.price.toLocaleString("ru-RU")} ₽
-                              </p>
-                              {selectedApt.price_per_sqm && (
-                                <p className="text-[11px] text-muted-foreground">
-                                  {selectedApt.price_per_sqm.toLocaleString("ru-RU")} ₽/м²
-                                </p>
-                              )}
-                              <Button
-                                size="sm"
-                                className="w-full mt-2 text-xs gap-1.5"
-                                onClick={() => { setAptModalApt(selectedApt); setAptModalOpen(true); }}
-                              >
-                                <Maximize2 className="h-3 w-3" /> Подробнее
-                              </Button>
+                                  ))}
+                                </tbody>
+                              </table>
                             </div>
                           </div>
-                        </div>
-                      )}
+                        );
+                      })}
                     </div>
-                  ) : (
-                    <div className="py-10 text-center">
-                      <Building2 className="mx-auto h-8 w-8 text-muted-foreground/40" />
-                      <p className="mt-2 text-xs text-muted-foreground">Квартиры скоро появятся</p>
-                    </div>
-                  )}
-                </TabsContent>
 
-                {/* Apartment Detail Modal */}
-                <Dialog open={aptModalOpen} onOpenChange={setAptModalOpen}>
-                  <DialogContent className="max-w-2xl">
-                    <DialogHeader>
-                      <DialogTitle>
-                        {aptModalApt && (Number(aptModalApt.rooms) === 0 ? "Студия" : `${aptModalApt.rooms}-комн. квартира`)}
-                        {aptModalApt && `, ${aptModalApt.area} м²`}
-                      </DialogTitle>
-                    </DialogHeader>
-                    {aptModalApt && (
-                      <div className="flex flex-col sm:flex-row gap-4">
-                        <div className="sm:w-1/2">
-                          <div className="aspect-square rounded-lg bg-secondary/30 border border-border flex items-center justify-center overflow-hidden">
-                            {aptModalApt.layout_url ? (
-                              <img src={aptModalApt.layout_url} alt="Планировка" className="max-h-full max-w-full object-contain" />
+                    {/* Right: selected layout preview */}
+                    {selectedApt && (
+                      <div className="hidden md:block w-[260px] shrink-0 sticky top-20 self-start">
+                        <div className="rounded-lg border border-border p-3">
+                          <div className="aspect-square rounded bg-secondary/30 border border-border flex items-center justify-center mb-3 overflow-hidden relative group">
+                            {selectedApt.layout_url ? (
+                              <>
+                                <img src={selectedApt.layout_url} alt="Планировка" className="max-h-full max-w-full object-contain" />
+                                <button
+                                  className="absolute top-2 right-2 h-7 w-7 bg-background/80 rounded-md border border-border flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                  onClick={() => { setAptModalApt(selectedApt); setAptModalOpen(true); }}
+                                >
+                                  <Maximize2 className="h-3.5 w-3.5" />
+                                </button>
+                              </>
                             ) : (
                               <div className="text-center">
-                                <Building2 className="mx-auto h-10 w-10 text-muted-foreground/30" />
-                                <p className="text-xs text-muted-foreground mt-2">Планировка недоступна</p>
+                                <Building2 className="mx-auto h-8 w-8 text-muted-foreground/30" />
+                                <p className="text-[10px] text-muted-foreground mt-1">Планировка недоступна</p>
                               </div>
                             )}
                           </div>
-                        </div>
-                        <div className="sm:w-1/2 space-y-3">
-                          <div className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground">Площадь</span>
-                              <span className="font-medium">{aptModalApt.area} м²</span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground">Этаж</span>
-                              <span className="font-medium">{aptModalApt.floor} из {aptModalApt.total_floors}</span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground">Срок сдачи</span>
-                              <span className="font-medium">{complex?.completion_date || "—"}</span>
-                            </div>
-                            {aptModalApt.price_per_sqm && (
-                              <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">Цена за м²</span>
-                                <span className="font-medium">{aptModalApt.price_per_sqm.toLocaleString("ru-RU")} ₽</span>
-                              </div>
+                          <div className="space-y-1.5">
+                            <p className="text-sm font-semibold">
+                              {Number(selectedApt.rooms) === 0 ? "Студия" : `${selectedApt.rooms}-комн.`} {selectedApt.area} м²
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {selectedApt.floor} этаж (из {selectedApt.total_floors})
+                            </p>
+                            <p className="text-base font-semibold text-foreground">
+                              {selectedApt.price.toLocaleString("ru-RU")} ₽
+                            </p>
+                            {selectedApt.price_per_sqm && (
+                              <p className="text-[11px] text-muted-foreground">
+                                {selectedApt.price_per_sqm.toLocaleString("ru-RU")} ₽/м²
+                              </p>
                             )}
-                          </div>
-                          <div className="border-t border-border pt-3">
-                            <p className="text-xl font-bold">{aptModalApt.price.toLocaleString("ru-RU")} ₽</p>
-                          </div>
-                          <div className="flex gap-2 pt-1">
-                            <Button className="flex-1 gap-1.5 text-xs" size="sm">
-                              <MessageSquare className="h-3.5 w-3.5" /> Запросить
-                            </Button>
-                            <Button variant="outline" className="gap-1.5 text-xs" size="sm">
-                              <Phone className="h-3.5 w-3.5" /> Позвонить
+                            <Button
+                              size="sm"
+                              className="w-full mt-2 text-xs gap-1.5"
+                              onClick={() => { setAptModalApt(selectedApt); setAptModalOpen(true); }}
+                            >
+                              <Maximize2 className="h-3 w-3" /> Подробнее
                             </Button>
                           </div>
                         </div>
                       </div>
                     )}
-                  </DialogContent>
-                </Dialog>
+                  </div>
+                ) : (
+                  <div className="py-10 text-center">
+                    <Building2 className="mx-auto h-8 w-8 text-muted-foreground/40" />
+                    <p className="mt-2 text-xs text-muted-foreground">Квартиры скоро появятся</p>
+                  </div>
+                )}
+              </section>
 
-                {/* About */}
-                <TabsContent value="about" className="space-y-3">
-                  <p className="text-sm text-muted-foreground leading-relaxed">{complex.description}</p>
-                  {complex.features && complex.features.length > 0 && (
-                    <div>
-                      <h3 className="mb-2 text-xs font-medium">Особенности</h3>
-                      <div className="flex flex-wrap gap-1.5">
-                        {complex.features.map((f) => (
-                          <span key={f} className="rounded bg-secondary px-2 py-1 text-xs text-foreground">
-                            <Check className="inline mr-0.5 h-3 w-3" /> {f}
-                          </span>
-                        ))}
+              {/* Apartment Detail Modal */}
+              <Dialog open={aptModalOpen} onOpenChange={setAptModalOpen}>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>
+                      {aptModalApt && (Number(aptModalApt.rooms) === 0 ? "Студия" : `${aptModalApt.rooms}-комн. квартира`)}
+                      {aptModalApt && `, ${aptModalApt.area} м²`}
+                    </DialogTitle>
+                  </DialogHeader>
+                  {aptModalApt && (
+                    <div className="flex flex-col sm:flex-row gap-4">
+                      <div className="sm:w-1/2">
+                        <div className="aspect-square rounded-lg bg-secondary/30 border border-border flex items-center justify-center overflow-hidden">
+                          {aptModalApt.layout_url ? (
+                            <img src={aptModalApt.layout_url} alt="Планировка" className="max-h-full max-w-full object-contain" />
+                          ) : (
+                            <div className="text-center">
+                              <Building2 className="mx-auto h-10 w-10 text-muted-foreground/30" />
+                              <p className="text-xs text-muted-foreground mt-2">Планировка недоступна</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="sm:w-1/2 space-y-3">
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Площадь</span>
+                            <span className="font-medium">{aptModalApt.area} м²</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Этаж</span>
+                            <span className="font-medium">{aptModalApt.floor} из {aptModalApt.total_floors}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Срок сдачи</span>
+                            <span className="font-medium">{complex?.completion_date || "—"}</span>
+                          </div>
+                          {aptModalApt.price_per_sqm && (
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">Цена за м²</span>
+                              <span className="font-medium">{aptModalApt.price_per_sqm.toLocaleString("ru-RU")} ₽</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="border-t border-border pt-3">
+                          <p className="text-xl font-bold">{aptModalApt.price.toLocaleString("ru-RU")} ₽</p>
+                        </div>
+                        <div className="flex gap-2 pt-1">
+                          <Button className="flex-1 gap-1.5 text-xs" size="sm">
+                            <MessageSquare className="h-3.5 w-3.5" /> Запросить
+                          </Button>
+                          <Button variant="outline" className="gap-1.5 text-xs" size="sm">
+                            <Phone className="h-3.5 w-3.5" /> Позвонить
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   )}
-                </TabsContent>
+                </DialogContent>
+              </Dialog>
 
-                {/* Calculator */}
-                <TabsContent value="calculator" className="space-y-4">
-                  <div className="grid gap-4 lg:grid-cols-2">
-                    <div className="rounded-lg border border-border p-4">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Calculator className="h-4 w-4 text-primary" />
-                        <h3 className="text-sm font-medium">Ипотека</h3>
-                      </div>
-                      <div className="space-y-3">
-                        <div>
-                          <label className="text-[11px] text-muted-foreground">Стоимость</label>
-                          <p className="text-sm font-medium">{formatPriceShort(mortgageCalc.price)}</p>
-                          <Slider value={[mortgageCalc.price]} onValueChange={([v]) => setMortgageCalc(p => ({ ...p, price: v }))} min={2000000} max={30000000} step={100000} className="mt-1" />
-                        </div>
-                        <div>
-                          <label className="text-[11px] text-muted-foreground">Первый взнос</label>
-                          <p className="text-sm font-medium">{formatPriceShort(mortgageCalc.downPayment)}</p>
-                          <Slider value={[mortgageCalc.downPayment]} onValueChange={([v]) => setMortgageCalc(p => ({ ...p, downPayment: v }))} min={0} max={mortgageCalc.price * 0.9} step={100000} className="mt-1" />
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="text-[11px] text-muted-foreground">Ставка, %</label>
-                            <Input type="number" value={mortgageCalc.rate} onChange={(e) => setMortgageCalc(p => ({ ...p, rate: Number(e.target.value) }))} className="mt-1 h-8 text-sm" />
-                          </div>
-                          <div>
-                            <label className="text-[11px] text-muted-foreground">Срок, лет</label>
-                            <Input type="number" value={mortgageCalc.years} onChange={(e) => setMortgageCalc(p => ({ ...p, years: Number(e.target.value) }))} className="mt-1 h-8 text-sm" />
-                          </div>
-                        </div>
-                        <div className="pt-2 border-t border-border">
-                          <p className="text-[11px] text-muted-foreground">Ежемесячный платёж</p>
-                          <p className="text-lg font-semibold text-primary">{formatPriceShort(calculateMortgage())}/мес</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="rounded-lg border border-border p-4">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Calculator className="h-4 w-4 text-muted-foreground" />
-                        <h3 className="text-sm font-medium">Рассрочка</h3>
-                      </div>
-                      <div className="space-y-3">
-                        <div>
-                          <label className="text-[11px] text-muted-foreground">Стоимость</label>
-                          <p className="text-sm font-medium">{formatPriceShort(installmentCalc.price)}</p>
-                          <Slider value={[installmentCalc.price]} onValueChange={([v]) => setInstallmentCalc(p => ({ ...p, price: v }))} min={2000000} max={30000000} step={100000} className="mt-1" />
-                        </div>
-                        <div>
-                          <label className="text-[11px] text-muted-foreground">Первый взнос</label>
-                          <p className="text-sm font-medium">{formatPriceShort(installmentCalc.downPayment)}</p>
-                          <Slider value={[installmentCalc.downPayment]} onValueChange={([v]) => setInstallmentCalc(p => ({ ...p, downPayment: v }))} min={0} max={installmentCalc.price * 0.9} step={100000} className="mt-1" />
-                        </div>
-                        <div>
-                          <label className="text-[11px] text-muted-foreground">Срок, мес.</label>
-                          <Input type="number" value={installmentCalc.months} onChange={(e) => setInstallmentCalc(p => ({ ...p, months: Number(e.target.value) }))} className="mt-1 h-8 text-sm" />
-                        </div>
-                        <div className="pt-2 border-t border-border">
-                          <p className="text-[11px] text-muted-foreground">Ежемесячный платёж</p>
-                          <p className="text-lg font-semibold text-foreground">{formatPriceShort(calculateInstallment())}/мес</p>
-                        </div>
-                      </div>
+              {/* === ABOUT === */}
+              <section id="about" className="scroll-mt-16 mb-10">
+                <h2 className="text-base font-semibold mb-3">О комплексе</h2>
+                <p className="text-sm text-muted-foreground leading-relaxed">{complex.description}</p>
+                {complex.features && complex.features.length > 0 && (
+                  <div className="mt-4">
+                    <h3 className="mb-2 text-xs font-medium">Особенности</h3>
+                    <div className="flex flex-wrap gap-1.5">
+                      {complex.features.map((f) => (
+                        <span key={f} className="rounded bg-secondary px-2 py-1 text-xs text-foreground">
+                          <Check className="inline mr-0.5 h-3 w-3" /> {f}
+                        </span>
+                      ))}
                     </div>
                   </div>
-                </TabsContent>
+                )}
+              </section>
 
-                {/* Reviews */}
-                <TabsContent value="reviews" className="space-y-4">
-                  <div className="rounded-lg border border-border p-4">
-                    <h3 className="text-sm font-medium mb-3">Оставить отзыв</h3>
-                    <div className="space-y-3">
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <div>
-                          <label className="text-[11px] text-muted-foreground">Имя</label>
-                          <Input value={reviewForm.name} onChange={(e) => setReviewForm(p => ({ ...p, name: e.target.value }))} placeholder="Иван" className="mt-1 h-8 text-sm" />
-                        </div>
-                        <div>
-                          <label className="text-[11px] text-muted-foreground">Оценка</label>
-                          <div className="mt-1 flex gap-0.5">
-                            {[1,2,3,4,5].map((n) => (
-                              <button key={n} onClick={() => setReviewForm(p => ({ ...p, rating: n }))}>
-                                <Star className={`h-5 w-5 ${n <= reviewForm.rating ? "fill-primary text-primary" : "text-border"}`} />
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <div>
-                          <label className="text-[11px] text-muted-foreground flex items-center gap-1"><ThumbsUp className="h-3 w-3 text-trust" /> Плюсы</label>
-                          <Input value={reviewForm.pros} onChange={(e) => setReviewForm(p => ({ ...p, pros: e.target.value }))} placeholder="Что понравилось" className="mt-1 h-8 text-sm" />
-                        </div>
-                        <div>
-                          <label className="text-[11px] text-muted-foreground flex items-center gap-1"><ThumbsDown className="h-3 w-3 text-destructive" /> Минусы</label>
-                          <Input value={reviewForm.cons} onChange={(e) => setReviewForm(p => ({ ...p, cons: e.target.value }))} placeholder="Что не понравилось" className="mt-1 h-8 text-sm" />
+              {/* === MORTGAGE CALCULATOR === */}
+              <section id="mortgage" className="scroll-mt-16 mb-10">
+                <h2 className="text-base font-semibold mb-4">Ипотечный калькулятор</h2>
+                <div className="flex flex-col lg:flex-row gap-4">
+                  {/* Left: inputs */}
+                  <div className="flex-1 rounded-lg border border-border p-5">
+                    {/* Program tags */}
+                    <div className="flex flex-wrap gap-2 mb-5">
+                      {["Семейная ипотека", "Новостройка", "IT-ипотека", "Военная"].map((prog, i) => (
+                        <button
+                          key={prog}
+                          className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${i === 0 ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground hover:bg-secondary/80"}`}
+                        >
+                          {prog}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="space-y-5">
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-1 block">Стоимость объекта, руб.</label>
+                        <Input
+                          value={mortgageCalc.price.toLocaleString("ru-RU")}
+                          onChange={(e) => { const v = Number(e.target.value.replace(/\D/g, "")); if (v) setMortgageCalc(p => ({ ...p, price: v })); }}
+                          className="h-10 text-sm font-medium"
+                        />
+                        <Slider value={[mortgageCalc.price]} onValueChange={([v]) => setMortgageCalc(p => ({ ...p, price: v }))} min={2000000} max={30000000} step={100000} className="mt-2" />
+                        <div className="flex justify-between text-[10px] text-muted-foreground mt-0.5">
+                          <span>2 млн ₽</span><span>30 млн ₽</span>
                         </div>
                       </div>
                       <div>
-                        <label className="text-[11px] text-muted-foreground">Отзыв</label>
-                        <Textarea value={reviewForm.text} onChange={(e) => setReviewForm(p => ({ ...p, text: e.target.value }))} placeholder="Поделитесь впечатлениями..." className="mt-1 text-sm resize-none" rows={3} />
+                        <label className="text-xs text-muted-foreground mb-1 block">Первоначальный взнос, руб.</label>
+                        <div className="relative">
+                          <Input
+                            value={mortgageCalc.downPayment.toLocaleString("ru-RU")}
+                            onChange={(e) => { const v = Number(e.target.value.replace(/\D/g, "")); setMortgageCalc(p => ({ ...p, downPayment: v })); }}
+                            className="h-10 text-sm font-medium pr-12"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                            {mortgageCalc.price > 0 ? Math.round(mortgageCalc.downPayment / mortgageCalc.price * 100) : 0}%
+                          </span>
+                        </div>
+                        <Slider value={[mortgageCalc.downPayment]} onValueChange={([v]) => setMortgageCalc(p => ({ ...p, downPayment: v }))} min={0} max={mortgageCalc.price * 0.9} step={100000} className="mt-2" />
+                        <div className="flex justify-between text-[10px] text-muted-foreground mt-0.5">
+                          <span>0 ₽</span><span>{formatPrice(mortgageCalc.price * 0.9)}</span>
+                        </div>
                       </div>
-                      <Button onClick={submitReview} disabled={submittingReview} size="sm" className="gap-1.5 text-xs">
-                        <Send className="h-3.5 w-3.5" /> Отправить
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs text-muted-foreground mb-1 block">Ставка, %</label>
+                          <Input type="number" value={mortgageCalc.rate} onChange={(e) => setMortgageCalc(p => ({ ...p, rate: Number(e.target.value) }))} className="h-10 text-sm font-medium" />
+                        </div>
+                        <div>
+                          <label className="text-xs text-muted-foreground mb-1 block">Срок кредита, лет</label>
+                          <Input type="number" value={mortgageCalc.years} onChange={(e) => setMortgageCalc(p => ({ ...p, years: Number(e.target.value) }))} className="h-10 text-sm font-medium" />
+                          <Slider value={[mortgageCalc.years]} onValueChange={([v]) => setMortgageCalc(p => ({ ...p, years: v }))} min={1} max={30} step={1} className="mt-2" />
+                          <div className="flex justify-between text-[10px] text-muted-foreground mt-0.5">
+                            <span>1 год</span><span>30 лет</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right: result */}
+                  <div className="lg:w-[300px] shrink-0 rounded-lg bg-secondary/50 p-5 flex flex-col justify-between">
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">Ежемесячный платёж</p>
+                      <p className="text-2xl font-bold text-foreground">{formatPriceShort(calculateMortgage())}</p>
+                      <div className="mt-4 space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Средняя ставка</span>
+                          <span className="font-semibold">{mortgageCalc.rate}%</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Сумма кредита</span>
+                          <span className="font-semibold">{formatPriceShort(mortgageCalc.price - mortgageCalc.downPayment)}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-5 space-y-2">
+                      <Button className="w-full gap-1.5" size="lg">
+                        <Send className="h-4 w-4" /> Подать заявку
+                      </Button>
+                      <p className="text-[10px] text-muted-foreground text-center">Одна заявка во все банки</p>
+                      <Button variant="outline" className="w-full gap-1.5 text-xs" size="sm">
+                        <MessageSquare className="h-3.5 w-3.5" /> Обсудить в чате
                       </Button>
                     </div>
                   </div>
-                  {reviews.length > 0 ? (
-                    <div className="space-y-2">
-                      {reviews.map((r) => (
-                        <div key={r.id} className="rounded-lg border border-border p-3">
-                          <div className="mb-1.5 flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm font-medium">{r.author_name}</span>
-                              {r.is_verified && <span className="rounded bg-secondary px-1.5 py-0.5 text-[10px]">Проверен</span>}
-                            </div>
-                            <div className="flex gap-0.5">
-                              {Array.from({ length: 5 }).map((_, i) => (
-                                <Star key={i} className={`h-3 w-3 ${i < r.rating ? "fill-primary text-primary" : "text-border"}`} />
-                              ))}
-                            </div>
-                          </div>
-                          <p className="text-xs text-muted-foreground whitespace-pre-line">{r.text}</p>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="py-6 text-center">
-                      <MessageSquare className="mx-auto h-6 w-6 text-muted-foreground/40" />
-                      <p className="mt-1 text-xs text-muted-foreground">Пока нет отзывов</p>
-                    </div>
-                  )}
-                </TabsContent>
+                </div>
+              </section>
 
-                {/* Developer */}
-                <TabsContent value="developer">
-                  {complex.developer && (
-                    <Link to={`/developer/${complex.developer.slug}`}>
-                      <div className="rounded-lg border border-border p-4 hover:bg-secondary/30 transition-colors">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-secondary text-sm font-semibold">
-                            {complex.developer.name.charAt(0)}
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="text-sm font-medium">{complex.developer.name}</h3>
-                            <p className="text-[11px] text-muted-foreground">{complex.developer.years_on_market} лет • {complex.developer.projects_count} проектов</p>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Star className="h-3.5 w-3.5 fill-primary text-primary" />
-                            <span className="text-sm font-medium">{complex.developer.rating}</span>
-                          </div>
-                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              {/* === INSTALLMENT CALCULATOR === */}
+              <section id="installment" className="scroll-mt-16 mb-10">
+                <h2 className="text-base font-semibold mb-4">Рассрочка от застройщика</h2>
+                <div className="flex flex-col lg:flex-row gap-4">
+                  {/* Left: inputs */}
+                  <div className="flex-1 rounded-lg border border-border p-5">
+                    <div className="space-y-5">
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-1 block">Стоимость объекта, руб.</label>
+                        <Input
+                          value={installmentCalc.price.toLocaleString("ru-RU")}
+                          onChange={(e) => { const v = Number(e.target.value.replace(/\D/g, "")); if (v) setInstallmentCalc(p => ({ ...p, price: v })); }}
+                          className="h-10 text-sm font-medium"
+                        />
+                        <Slider value={[installmentCalc.price]} onValueChange={([v]) => setInstallmentCalc(p => ({ ...p, price: v }))} min={2000000} max={30000000} step={100000} className="mt-2" />
+                        <div className="flex justify-between text-[10px] text-muted-foreground mt-0.5">
+                          <span>2 млн ₽</span><span>30 млн ₽</span>
                         </div>
                       </div>
-                    </Link>
-                  )}
-                </TabsContent>
-              </Tabs>
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-1 block">Первоначальный взнос, руб.</label>
+                        <div className="relative">
+                          <Input
+                            value={installmentCalc.downPayment.toLocaleString("ru-RU")}
+                            onChange={(e) => { const v = Number(e.target.value.replace(/\D/g, "")); setInstallmentCalc(p => ({ ...p, downPayment: v })); }}
+                            className="h-10 text-sm font-medium pr-12"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                            {installmentCalc.price > 0 ? Math.round(installmentCalc.downPayment / installmentCalc.price * 100) : 0}%
+                          </span>
+                        </div>
+                        <Slider value={[installmentCalc.downPayment]} onValueChange={([v]) => setInstallmentCalc(p => ({ ...p, downPayment: v }))} min={0} max={installmentCalc.price * 0.9} step={100000} className="mt-2" />
+                        <div className="flex justify-between text-[10px] text-muted-foreground mt-0.5">
+                          <span>0 ₽</span><span>{formatPrice(installmentCalc.price * 0.9)}</span>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-1 block">Срок рассрочки, мес.</label>
+                        <Input type="number" value={installmentCalc.months} onChange={(e) => setInstallmentCalc(p => ({ ...p, months: Number(e.target.value) }))} className="h-10 text-sm font-medium" />
+                        <Slider value={[installmentCalc.months]} onValueChange={([v]) => setInstallmentCalc(p => ({ ...p, months: v }))} min={3} max={60} step={1} className="mt-2" />
+                        <div className="flex justify-between text-[10px] text-muted-foreground mt-0.5">
+                          <span>3 мес</span><span>60 мес</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right: result */}
+                  <div className="lg:w-[300px] shrink-0 rounded-lg bg-secondary/50 p-5 flex flex-col justify-between">
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">Ежемесячный платёж</p>
+                      <p className="text-2xl font-bold text-foreground">{formatPriceShort(calculateInstallment())}</p>
+                      <div className="mt-4 space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Без процентов</span>
+                          <span className="font-semibold text-trust">0%</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Остаток</span>
+                          <span className="font-semibold">{formatPriceShort(installmentCalc.price - installmentCalc.downPayment)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Срок</span>
+                          <span className="font-semibold">{installmentCalc.months} мес.</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-5 space-y-2">
+                      <Button className="w-full gap-1.5" size="lg">
+                        <Send className="h-4 w-4" /> Узнать условия
+                      </Button>
+                      <Button variant="outline" className="w-full gap-1.5 text-xs" size="sm">
+                        <MessageSquare className="h-3.5 w-3.5" /> Обсудить в чате
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* === REVIEWS === */}
+              <section id="reviews" className="scroll-mt-16 mb-10">
+                <h2 className="text-base font-semibold mb-3">Отзывы</h2>
+                <div className="rounded-lg border border-border p-4 mb-4">
+                  <h3 className="text-sm font-medium mb-3">Оставить отзыв</h3>
+                  <div className="space-y-3">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div>
+                        <label className="text-[11px] text-muted-foreground">Имя</label>
+                        <Input value={reviewForm.name} onChange={(e) => setReviewForm(p => ({ ...p, name: e.target.value }))} placeholder="Иван" className="mt-1 h-8 text-sm" />
+                      </div>
+                      <div>
+                        <label className="text-[11px] text-muted-foreground">Оценка</label>
+                        <div className="mt-1 flex gap-0.5">
+                          {[1,2,3,4,5].map((n) => (
+                            <button key={n} onClick={() => setReviewForm(p => ({ ...p, rating: n }))}>
+                              <Star className={`h-5 w-5 ${n <= reviewForm.rating ? "fill-primary text-primary" : "text-border"}`} />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div>
+                        <label className="text-[11px] text-muted-foreground flex items-center gap-1"><ThumbsUp className="h-3 w-3 text-trust" /> Плюсы</label>
+                        <Input value={reviewForm.pros} onChange={(e) => setReviewForm(p => ({ ...p, pros: e.target.value }))} placeholder="Что понравилось" className="mt-1 h-8 text-sm" />
+                      </div>
+                      <div>
+                        <label className="text-[11px] text-muted-foreground flex items-center gap-1"><ThumbsDown className="h-3 w-3 text-destructive" /> Минусы</label>
+                        <Input value={reviewForm.cons} onChange={(e) => setReviewForm(p => ({ ...p, cons: e.target.value }))} placeholder="Что не понравилось" className="mt-1 h-8 text-sm" />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-[11px] text-muted-foreground">Отзыв</label>
+                      <Textarea value={reviewForm.text} onChange={(e) => setReviewForm(p => ({ ...p, text: e.target.value }))} placeholder="Поделитесь впечатлениями..." className="mt-1 text-sm resize-none" rows={3} />
+                    </div>
+                    <Button onClick={submitReview} disabled={submittingReview} size="sm" className="gap-1.5 text-xs">
+                      <Send className="h-3.5 w-3.5" /> Отправить
+                    </Button>
+                  </div>
+                </div>
+                {reviews.length > 0 ? (
+                  <div className="space-y-2">
+                    {reviews.map((r) => (
+                      <div key={r.id} className="rounded-lg border border-border p-3">
+                        <div className="mb-1.5 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium">{r.author_name}</span>
+                            {r.is_verified && <span className="rounded bg-secondary px-1.5 py-0.5 text-[10px]">Проверен</span>}
+                          </div>
+                          <div className="flex gap-0.5">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <Star key={i} className={`h-3 w-3 ${i < r.rating ? "fill-primary text-primary" : "text-border"}`} />
+                            ))}
+                          </div>
+                        </div>
+                        <p className="text-xs text-muted-foreground whitespace-pre-line">{r.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-6 text-center">
+                    <MessageSquare className="mx-auto h-6 w-6 text-muted-foreground/40" />
+                    <p className="mt-1 text-xs text-muted-foreground">Пока нет отзывов</p>
+                  </div>
+                )}
+              </section>
+
+              {/* === DEVELOPER === */}
+              <section id="developer" className="scroll-mt-16 mb-10">
+                <h2 className="text-base font-semibold mb-3">Застройщик</h2>
+                {complex.developer && (
+                  <Link to={`/developer/${complex.developer.slug}`}>
+                    <div className="rounded-lg border border-border p-4 hover:bg-secondary/30 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-md bg-secondary text-sm font-semibold">
+                          {complex.developer.name.charAt(0)}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-sm font-medium">{complex.developer.name}</h3>
+                          <p className="text-[11px] text-muted-foreground">{complex.developer.years_on_market} лет • {complex.developer.projects_count} проектов</p>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Star className="h-3.5 w-3.5 fill-primary text-primary" />
+                          <span className="text-sm font-medium">{complex.developer.rating}</span>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                    </div>
+                  </Link>
+                )}
+              </section>
 
               {/* Similar */}
               {similarComplexes.length > 0 && (
